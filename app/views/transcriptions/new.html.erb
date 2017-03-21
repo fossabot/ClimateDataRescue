@@ -22,10 +22,10 @@
                 <li>End Date: <%= @page.end_date %></li>
                 <% if @page.has_metadata? %>
                     <li>
+                        <strong>Observations per day</strong>
                         <ul>
-                            <li><strong>Observations per day</strong></li>
                             <% @page.page_days.order("date asc").each do |day| %>
-                                <li>Date: <%= day.date %>, <%= day.num_observations %> observations</li>
+                                <%= render "page_days/transcriptions_page_metadata_day", day: day %>
                             <% end %>
                         </ul>
                     </li>
@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row voffset20">
         <% if @page.has_metadata? %>
             <div class="col-sm-9">
                 <%= simple_form_for @transcription do |f| %>
@@ -44,9 +44,9 @@
                         <%= f.button :submit, "Start Transcribing", class: "btn btn-primary" %>
                     </div>
                 <% end %>
+            </div>
             <div class="col-sm-3">
                 <%= link_to "Skip and try another", new_transcription_path, class: "btn btn-info pull-right"%>
-            </div>
             </div>
         <% else %>
             <div class="col-md-12">
@@ -85,19 +85,46 @@
             <% end %>
         <% end %>
     </div>
-        
-    <!-- <div class="row" style="margin-top: 20px;">
-        <div class="col-md-12"> -->
-            <% content_for :large_page_image do %>
-                <%= image_tag @page.image.url(:xlarge), id: "baseImage", draggable: true, class: "transcribeable-img", data: {original: @page.image.url(:original) } %>
-            <% end %>
-    <!--     </div>
-    </div> -->
+    
+    <% content_for :large_page_image do %>
+        <%= image_tag @page.image.url(:xlarge), id: "baseImage", draggable: true, class: "transcribeable-img", data: {original: @page.image.url(:original) } %>
+    <% end %>
+    
     
     <script type="text/javascript">
         $(document).ready(function() {
             $(".toggle-date-override").change(function() {
                 $(this).siblings(".date-override").toggle();
+            });
+
+
+
+            $('.edit-day-info-btn').click(function(e) {
+                var $editBtn = $(this);
+                var $pageDay = $editBtn.parents('.page-metadata-day');
+                var $saveBtn = $pageDay.find('.save-day-btn');
+
+                var dayInfo = {
+                    id : $editBtn.data('id'), 
+                    date : $editBtn.data('date'),
+                    num_observations : $editBtn.data('num-obs')
+                };
+                console.log(dayInfo);
+
+                $editBtn.hide();
+                $saveBtn.show();
+
+                var $dateArea = $pageDay.find('.page-day-date');
+                var $numObsArea = $pageDay.find('.page-day-num-observations');
+                var $dateInput = $('<input />');
+                $dateInput.css({
+                    width : '100px'
+                }).val(dayInfo.date);
+                var $numObsSelect = $('<select></select>');
+
+
+
+                $dateArea.html($dateInput);
             });
         });
     </script>
