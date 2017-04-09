@@ -154,7 +154,61 @@
                         content : $('#stop-transcribing-template').html(),
                         showFooter : false
                     }).open();
-                }
+                },
+                'click .btn-zoom-in:not(.disabled)': 'zoomIn',
+                'click .btn-zoom-out:not(.disabled)': 'zoomOut',
+                'click .btn-zoom-level [data-zoom-level]' : function(e) {
+                  var zoom = $(e.target).data('zoom-level');
+                  this.zoomPage(zoom, true);
+                },
+            },
+
+            initialize : function(opts) {
+                this.options = opts || {};
+                this.currentZoom = 1;
+                this.zoomContainer = $();
+            },
+
+            zoomIn : function() {
+              this.zoomPage((this.currentZoom + 0.1));
+            },
+
+            zoomOut : function() {
+              this.zoomPage((this.currentZoom - 0.1));
+            },
+            zoomPage : function(value, percent = false) {
+              var zoom = (percent ? (value / 100) : value);
+              if (zoom > 0.1) {
+                var containerHeight = $("#transcriber-container").height();
+                var toolbarHeight = $("#transcriber-toolbar").height();
+                var headerImgHeight = $("#header-image-container").height();
+
+                this.zoomContainer.height(containerHeight - (toolbarHeight + headerImgHeight));
+
+                this.zoomContainer.css({
+                  zoom : zoom,
+                  // handle zoom css for firefox
+                  '-moz-transform' : ('scale(' + zoom + ')'),
+                  '-moz-transform-origin' : 'left top'
+                });
+                $(window).trigger('resize');
+                this.currentZoom = zoom;
+                this.updateZoomLevel();
+              };
+            },
+
+            updateZoomLevel : function(zoomPage = false) {
+              // Update zoom level value displayed to the user in the indicator.
+              // Optionally, zoom the results to the current page
+              this.$('.current-zoom').html(Math.round(this.currentZoom * 100));
+              if (zoomPage) this.zoomPage(this.currentZoom);
+            },
+
+            setZoomContainer : function () {
+                var args = [...arguments];
+                this.zoomContainer = this.zoomContainer.add(args);
+
+                console.log(this.zoomContainer);
             },
 
             onRender : function() {
@@ -252,25 +306,24 @@
                 });
                 
 
-                if (this.model.get("resizeContainer")) {
-                    // console.info("resize");
-                    containerHeight = $("#transcriber-container").height();
-                    toolbarHeight = $("#transcriber-toolbar").height();
-                    headerImgHeight = $("#header-image-container").height();
+                
+                self.resizeContainer();
 
-                    self.$el.height(containerHeight - (toolbarHeight + headerImgHeight));
-
-                    $(window).on('resize', function() {
-                        containerHeight = $("#transcriber-container").height();
-                        toolbarHeight = $("#transcriber-toolbar").height();
-                        headerImgHeight = $("#header-image-container").height();
-
-                        self.$el.height(containerHeight - (toolbarHeight + headerImgHeight));
-                    });
-                };
+                $(window).on('resize', function() {
+                    self.resizeContainer();
+                });
 
                 if (this.options.postRenderFn) {
                     this.options.postRenderFn.call(this);
+                };
+            },
+            resizeContainer : function () {
+                if (this.model.get("resizeContainer")) {
+                    var containerHeight = $("#transcriber-container").height();
+                    var toolbarHeight = $("#transcriber-toolbar").height();
+                    var headerImgHeight = $("#header-image-container").height();
+
+                    this.$el.height(containerHeight - (toolbarHeight + headerImgHeight));
                 };
             }
         });
@@ -1193,6 +1246,8 @@
                 mainLayout.headerImg.show(headerImg);
                 mainLayout.timeImg.show(timeImg);
                 mainLayout.pageContainer.show(pageCanvas);
+
+                toolbarLayout.setZoomContainer(pageCanvas.el, headerImg.el, timeImg.el);
 
                 setTimeout(function() {
                     headerImg.$el.kinetic("scrollTop", 390);
