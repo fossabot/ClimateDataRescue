@@ -14,9 +14,9 @@ html lang="en"
     - if content_for(:head)
       = yield(:head)
 
-    - if StaticPage.visible.find_by(slug: "/custom_stylesheet")
-      style#admin-stylesheet type="text/css"
-        = render_snippet("/custom_stylesheet")
+    / - if StaticPage.visible.find_by(slug: "/custom_stylesheet")
+    /   style#admin-stylesheet type="text/css"
+    /     = render_snippet("/custom_stylesheet")
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     
     = javascript_include_tag "application"

@@ -12,11 +12,11 @@
     .row.voffset30
         .col-md-12.homepage-intro
             
-            - if StaticPage.find_by(slug: "/homepage-intro").present?
-                = render_snippet("/homepage-intro")
-            - else
+            / - if StaticPage.find_by(slug: "/homepage-intro").present?
+            /     = render_snippet("/homepage-intro")
+            / - else
                 
-                = t('draw-homepage-intro')
+            /     = t('draw-homepage-intro')
 
     .row.voffset40.boffset20
         .col-md-12.homepage-actions.text-center
