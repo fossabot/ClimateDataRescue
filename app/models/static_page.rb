@@ -1,10 +1,10 @@
-class StaticPage < ActiveRecord::Base
+class StaticPage < ApplicationRecord
   translates :title, :body, :slug, :meta_keywords, :meta_title,
              :meta_description, fallbacks_for_empty_translations: true
   globalize_accessors
 
+  belongs_to :parent, class_name: 'StaticPage', optional: true
   has_many :children, class_name: 'StaticPage', :dependent => :destroy, foreign_key: :parent_id
-  belongs_to :parent, class_name: 'StaticPage'
 
   default_scope { order(position: :asc) }
 
@@ -38,7 +38,7 @@ class StaticPage < ActiveRecord::Base
   end
 
   def link
-    foreign_link.blank? ? ('/' + I18n.locale.to_s + slug) : foreign_link
+    foreign_link.blank? ? "/#{I18n.locale}#{slug}" : foreign_link
   end
   
   def is_external?
